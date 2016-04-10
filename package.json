@@ -1,0 +1,31 @@
+{
+  "name": "warm-require",
+  "version": "0.0.1",
+  "description": "warm-require node modules",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/azizhk/warm-require.git"
+  },
+  "keywords": [
+    "warm",
+    "hot",
+    "require",
+    "reload",
+    "node",
+    "modules"
+  ],
+  "author": "Aziz Khambati",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/azizhk/warm-require/issues"
+  },
+  "homepage": "https://github.com/azizhk/warm-require",
+  "dependencies": {
+    "chokidar": "^1.4.3",
+    "graceful-fs": "^4.1.3"
+  }
+}
