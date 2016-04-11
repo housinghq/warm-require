@@ -26,9 +26,15 @@ exports.watch = function(config) {
 	} else if ( typeof(config.transpiler) === 'object' ) {
 		config.transpiler = objTranspiler.bind(null, config.transpiler);
 	}
-
 	if ( typeof(config.transpiler) !== 'function' ) {
 		throw errors.TRANSPILER_NON_FUNCTION;
 	}
-	return loader.warmRequire.bind(null, config.transpiler);
+
+	if (!config.exts) {
+		config.exts = ['js'];
+	} else if (config.exts.indexOf('js') === -1) {
+		config.exts.push('js');
+	}
+
+	return loader.warmRequire.bind(null, config);
 };

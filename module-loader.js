@@ -66,40 +66,42 @@ function genRelativeRequire(folder, filename) {
 	}
 }
 
-function checkPath(file) {
+function checkPath(file, exts) {
 	var stats;
 	try {
 		stats = fs.statSync(file);
 		if (stats.isDirectory()) {
-			return file + '/index.js';
+			return checkPath(file + '/index', exts);
 		}
 		return file;
 	} catch (e) {
 		// Do nothing. Drink Tea.
 	}
-	try {
-		stats = fs.statSync(file + '.js')
-		if (!stats.isDirectory()) {
-			return file + '.js'
+	for (var i=0; i<exts.length; i++) {
+		try {
+			stats = fs.statSync(file + '.' + exts[i]);
+			if (!stats.isDirectory()) {
+				return file + '.' + exts[i];
+			}
+		} catch (e2) {
+			// Drink Ice Tea, because you took that long to drink warm tea.
 		}
-	} catch (e2) {
-		// Drink Ice Tea, because you took that long to drink warm tea.
 	}
 	return null;
 }
 
-function absolutePath(folder, file) {
+function absolutePath(folder, file, exts) {
 	if (file.charAt(0) === '.') {
 		if (!folder) {
 			throw errors.NON_ABSOLUTE_PATH;
 		}
-		return checkPath(path.resolve(folder, file));
+		return checkPath(path.resolve(folder, file), exts);
 	}
 	if (file.charAt(0) === '/') {
-		return checkPath(file);
+		return checkPath(file, exts);
 	}
 	for (var i=0; i<nodePaths.length; i++) {
-		var test = checkPath( path.resolve(nodePaths[i], file) );
+		var test = checkPath( path.resolve(nodePaths[i], file), exts );
 		if ( test ) {
 			return test;
 		}
@@ -124,7 +126,7 @@ function addDependent(dependent, absolute) {
 }
 
 // Not Pure
-function warmRequire(transpiler, folder, dependent, filename) {
+function warmRequire(config, folder, dependent, filename) {
 	if ( (arguments.length < 2) || (arguments.length > 3) )
 		throw errors.INVALID_ARGUMENTS;
 
@@ -142,7 +144,7 @@ function warmRequire(transpiler, folder, dependent, filename) {
 		addDependent(dependent, cachePath);
 	}
 
-	var absolute = absolutePath(folder, filename);
+	var absolute = absolutePath(folder, filename, config.exts);
 	if (!absolute) {
 		if (!cachePath) {
 			throw errors.FILE_DOES_NOT_EXIST;
@@ -162,7 +164,7 @@ function warmRequire(transpiler, folder, dependent, filename) {
 
 	var func = funcCache[absolute] || funcCache[cachePath];
 	if (!func) {
-		var code = transpiler( fs.readFileSync(absolute, {
+		var code = config.transpiler( fs.readFileSync(absolute, {
 			encoding: 'utf-8'
 		}), absolute);
 
@@ -181,7 +183,7 @@ function warmRequire(transpiler, folder, dependent, filename) {
 	}
 	var relativeRequire = warmRequire.bind(
 		null,
-		transpiler,
+		config,
 		targetDependent,
 		targetFolder
 	);
