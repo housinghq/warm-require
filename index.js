@@ -7,10 +7,14 @@ function dummyTranspiler(str) {
 }
 
 function objTranspiler(obj, str, filename) {
-	var ext = filename.match(/\.[^\/]*$/);
-	if (typeof(obj[ext]) === 'function' ) {
-		return obj[ext](str);
+	var extMatch = filename.match(/\.[^\/]*$/);
+	if (extMatch && extMatch.length) {
+		var ext = extMatch[0].slice(1);
+		if (typeof(obj[ext]) === 'function' ) {
+			return obj[ext](str);
+		}
 	}
+
 	return str;
 }
 

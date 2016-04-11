@@ -127,7 +127,7 @@ function addDependent(dependent, absolute) {
 
 // Not Pure
 function warmRequire(config, folder, dependent, filename) {
-	if ( (arguments.length < 2) || (arguments.length > 3) )
+	if ( (arguments.length < 2) || (arguments.length > 4) )
 		throw errors.INVALID_ARGUMENTS;
 
 	if (!filename) {
@@ -141,7 +141,7 @@ function warmRequire(config, folder, dependent, filename) {
 		if (moduleCache[cachePath]) {
 			return moduleCache[cachePath];
 		}
-		addDependent(dependent, cachePath);
+
 	}
 
 	var absolute = absolutePath(folder, filename, config.exts);
@@ -154,10 +154,11 @@ function warmRequire(config, folder, dependent, filename) {
 
 	if (!cachePath) {
 		cachePath = absolute;
-		addDependent(dependent, absolutePath);
 	} else {
 		absCacheMap[absolute] = cachePath;
+		addDependent(dependent, cachePath);
 	}
+	addDependent(dependent, absolute);
 	if (moduleCache[absolute]) {
 		return moduleCache[absolute];
 	}
@@ -174,7 +175,7 @@ function warmRequire(config, folder, dependent, filename) {
 		}
 	}
 
-	var targetFolder = path.dirname(filename);
+	var targetFolder = path.dirname(absolute);
 	var targetDependent = {
 		absolute: absolute
 	};
@@ -184,8 +185,8 @@ function warmRequire(config, folder, dependent, filename) {
 	var relativeRequire = warmRequire.bind(
 		null,
 		config,
-		targetDependent,
-		targetFolder
+		targetFolder,
+		targetDependent
 	);
 
 	var mod = {}, exp = {};
