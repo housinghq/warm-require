@@ -47,25 +47,6 @@ function burst(filename) {
 	});
 }
 
-function genRelativeRequire(folder, filename) {
-	return function(newfilename) {
-		if (newfilename.charAt(0) === '.') {
-			newfilename = path.resolve(folder, newfilename);
-			if (!depsTree[newfilename]) {
-				depsTree[newfilename] = [];
-			}
-			if (depsTree[newfilename].indexOf(filename) === -1) {
-				depsTree[newfilename].push(filename);
-			}
-			return hot_require(newfilename);
-		} else if (nodePaths.length) {
-
-		}
-
-		return require(newfilename);
-	}
-}
-
 function checkPath(file, exts) {
 	var stats;
 	try {
