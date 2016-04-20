@@ -1,6 +1,7 @@
 var Module = module.constructor;
 var fs = require('graceful-fs');
 var path = require('path');
+var anymatch = require('anymatch');
 
 // Modules
 var errors = require('./errors');
@@ -37,41 +38,37 @@ function addDependent(dependent, filename) {
 	}
 }
 
-function warmRequire(request, parent) {
-	if ( (arguments.length < 1) || (arguments.length > 2) )
-		throw errors.INVALID_ARGUMENTS;
-
-	var filename = Module._resolveFilename(request, parent);
-	if (!filename) {
-		throw errors.FILE_DOES_NOT_EXIST;
-	}
-
-	var cachedModule = Module._cache[filename];
-	if (cachedModule) {
-		return cachedModule.exports;
-	}
-
-	if (loading[filename]) {
-		throw {
-			message: 'Circular dep: ' + filename
-		};
-	}
-	loading[filename] = true;
-
-	if (parent) {
-		addDependent(parent.filename, filename);
-	}
-
-	var m = new Module(filename);
-	m.require = function(targetPath) {
-		return warmRequire(targetPath, m);
-	}
-	m.load(filename);
-	Module._cache[filename] = m;
-
-	loading[filename] = false;
-	return m.exports;
-};
-
 exports.burst = burst;
-exports.warmRequire = warmRequire;
+exports.default = function(config) {
+	return function warmRequire(request, parent) {
+		if ( (arguments.length < 1) || (arguments.length > 2) )
+			throw errors.INVALID_ARGUMENTS;
+
+		var filename = Module._resolveFilename(request, parent);
+		if (!filename) {
+			throw errors.FILE_DOES_NOT_EXIST;
+		}
+
+		if (!anymatch(config.paths, filename)) {
+			return require(filename);
+		}
+
+		if (parent) {
+			addDependent(parent.filename, filename);
+		}
+
+		var cachedModule = Module._cache[filename];
+		if (cachedModule) {
+			return cachedModule.exports;
+		}
+
+		var m = new Module(filename);
+		Module._cache[filename] = m;
+		m.require = function(targetPath) {
+			return warmRequire(targetPath, m);
+		}
+		m.load(filename);
+
+		return m.exports;
+	};
+};

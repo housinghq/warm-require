@@ -8,5 +8,5 @@ function onChange(file) {
 
 exports.watch = function(config) {
 	var watcher = watch(config, onChange);
-	return loader.warmRequire;
+	return loader.default(config);
 };
