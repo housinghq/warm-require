@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/azizhk/warm-require",
   "dependencies": {
+    "anymatch": "^1.3.0",
     "chokidar": "^1.4.3",
     "graceful-fs": "^4.1.3"
   }
