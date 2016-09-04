@@ -1,6 +1,6 @@
 {
   "name": "warm-require",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "warm-require node modules",
   "main": "index.js",
   "scripts": {
